@@ -2,7 +2,7 @@ import * as custom from './custom';
 import {getDigits, makeCheckDigits} from '../helpers';
 import {Mask} from './models/Mask';
 
-class CPF extends Mask {
+class CPF implements Mask {
   private getCheckDigit = (digits: string) => {
     const numbers = digits.split('').map(number => {
       return parseInt(number, 10);

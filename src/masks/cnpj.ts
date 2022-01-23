@@ -2,7 +2,7 @@ import * as custom from './custom';
 import {getDigits, makeCheckDigits} from '../helpers';
 import {Mask} from './models/Mask';
 
-class CNPJ extends Mask {
+class CNPJ implements Mask {
   private getCheckDigit = (digits: string) => {
     let index = 2;
 

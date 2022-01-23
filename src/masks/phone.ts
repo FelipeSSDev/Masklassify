@@ -16,7 +16,7 @@ const PHONE_8_MASK = '9999-9999';
 const PHONE_9_MASK = '99999-9999';
 const PHONE_INTERNATIONAL = '+999 999 999 999';
 
-class Phone extends Mask {
+class Phone implements Mask {
   private getMask = (phone: string, settings?: Settings) => {
     const merged = mergeSettings(DEFAULT_SETTINGS, settings);
 

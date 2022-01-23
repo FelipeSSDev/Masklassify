@@ -17,7 +17,7 @@ const DEFAULT_SETTINGS: Settings = {
   suffixUnit: '',
 };
 
-class Money extends Mask {
+class Money implements Mask {
   private sanitize = (value: string | number, precision: number) => {
     if (typeof value === 'number') {
       return value.toFixed(precision);
