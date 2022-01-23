@@ -3,7 +3,7 @@ import {cnpj} from '../../src/masks';
 describe('Test CNPJ Mask', () => {
   const sut = cnpj;
 
-  it('should received CEP as a defined object', () => {
+  it('should receive CEP as a defined object', () => {
     expect(sut).toBeDefined();
   });
 

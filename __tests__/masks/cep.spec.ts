@@ -3,7 +3,7 @@ import {cep} from '../../src/masks';
 describe('Test CEP Mask', () => {
   const sut = cep;
 
-  it('should received CEP as a defined object', () => {
+  it('should receive CEP as a defined object', () => {
     expect(sut).toBeDefined();
   });
 
