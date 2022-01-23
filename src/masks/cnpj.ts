@@ -1,59 +1,51 @@
 import * as custom from './custom';
-import {toNumber} from './helpers';
+import {getDigits, makeCheckDigits} from '../helpers';
+import {Mask} from './models/Mask';
 
-const BLACKLIST: Array<string> = [
-  '00000000000000',
-  '11111111111111',
-  '22222222222222',
-  '33333333333333',
-  '44444444444444',
-  '55555555555555',
-  '66666666666666',
-  '77777777777777',
-  '88888888888888',
-  '99999999999999',
-];
+class CNPJ extends Mask {
+  private getCheckDigit = (digits: string) => {
+    let index = 2;
 
-const verifierDigit = (digits: string) => {
-  let index = 2;
+    const reverse: Array<number> = digits.split('').reduce((prev: number[], curr) => {
+      return [parseInt(curr, 10)].concat(prev);
+    }, []);
 
-  const reverse: Array<number> = digits.split('').reduce((prev: number[], curr) => {
-    return [parseInt(curr, 10)].concat(prev);
-  }, []);
+    const sum = reverse.reduce((total, currentValue) => {
+      total += currentValue * index;
+      index = index === 9 ? 2 : index + 1;
+      return total;
+    }, 0);
 
-  const sum = reverse.reduce((prev, curr) => {
-    prev += curr * index;
-    index = index === 9 ? 2 : index + 1;
-    return prev;
-  }, 0);
+    const mod = sum % 11;
 
-  const mod = sum % 11;
+    return String(mod < 2 ? 0 : 11 - mod);
+  };
 
-  return mod < 2 ? 0 : 11 - mod;
-};
+  validate = (cnpj = '') => {
+    const stripped = getDigits(cnpj);
 
-export const validate = (s: '') => {
-  const stripped = toNumber(s);
+    if (!stripped) {
+      return false;
+    }
 
-  if (!stripped) {
-    return false;
-  }
+    if (stripped.length !== 14) {
+      return false;
+    }
 
-  if (stripped.length !== 14) {
-    return false;
-  }
+    const checkDigits = makeCheckDigits({
+      digitsWithoutCheckDigits: stripped,
+      length: 12,
+      checker: this.getCheckDigit,
+    });
 
-  if (BLACKLIST.includes(stripped)) {
-    return false;
-  }
+    const checkDigitsInValidation = stripped.substring(-2);
 
-  let numbers = stripped.substring(0, 12);
-  numbers += verifierDigit(numbers);
-  numbers += verifierDigit(numbers);
+    return checkDigits === checkDigitsInValidation;
+  };
 
-  return numbers.substring(-2) === stripped.substring(-2);
-};
+  raw = (cnpj = '') => getDigits(cnpj);
 
-export const raw = (s = '') => toNumber(s);
+  value = (cnpj = '') => custom.value(cnpj, '99.999.999/9999-99');
+}
 
-export const value = (s = '') => custom.value(s, '99.999.999/9999-99');
+export default new CNPJ();

@@ -1,79 +1,85 @@
-import {mergeSettings, toNumber} from './helpers';
+import {Mask} from './models/Mask';
+import {mergeSettings, getDigits} from '../helpers';
 
 type Settings = {
   precision?: number;
+  floatingPoint?: string;
   separator?: string;
-  delimiter?: string;
   suffixUnit?: string;
   unit?: string;
 };
 
 const DEFAULT_SETTINGS: Settings = {
   precision: 2,
-  separator: ',',
-  delimiter: '.',
+  floatingPoint: ',',
+  separator: '.',
   unit: 'R$ ',
   suffixUnit: '',
 };
 
-const sanitize = (value: string | number, precision: number) => {
-  if (typeof value === 'number') {
-    return value.toFixed(precision);
-  }
-  return value;
-};
+class Money extends Mask {
+  private sanitize = (value: string | number, precision: number) => {
+    if (typeof value === 'number') {
+      return value.toFixed(precision);
+    }
+    return value;
+  };
 
-const insert = (s: string, index: number) => {
-  if (index > 0) return s.substring(0, index) + '.' + s.substring(index, s.length);
-  else return '.' + s;
-};
+  private insert = (s: string, index: number) => {
+    if (index > 0) return s.substring(0, index) + '.' + s.substring(index, s.length);
 
-const toMoney = (s: string, settings: Required<Settings>) => {
-  const number = s.toString().replace(/[\D]/g, ''),
-    clearSeparator = new RegExp('(\\' + settings.separator + ')$'),
-    clearDelimiter = new RegExp('^(0|\\' + settings.delimiter + ')');
+    return '.' + s;
+  };
 
-  let money = number.substring(0, number.length - settings.precision),
-    masked = money.substring(0, money.length % 3),
-    cents = new Array(settings.precision + 1).join('0');
+  private toMoney = (s: string, settings: Required<Settings>) => {
+    const number = s.toString().replace(/[\D]/g, ''),
+      clearFloatingPoint = new RegExp('(\\' + settings.floatingPoint + ')$'),
+      clearSeparator = new RegExp('^(0|\\' + settings.separator + ')');
 
-  money = money.substring(money.length % 3, money.length);
+    let money = number.substring(0, number.length - settings.precision),
+      masked = money.substring(0, money.length % 3),
+      cents = new Array(settings.precision + 1).join('0');
 
-  for (let i = 0, len = money.length; i < len; i++) {
-    if (i % 3 === 0) masked += settings.delimiter;
-    masked += money[i];
-  }
+    money = money.substring(money.length % 3, money.length);
 
-  masked = masked.replace(clearDelimiter, '');
-  masked = masked.length ? masked : '0';
+    for (let i = 0, len = money.length; i < len; i++) {
+      if (i % 3 === 0) masked += settings.separator;
+      masked += money[i];
+    }
 
-  const beginCents = number.length - settings.precision,
-    centsValue = number.substring(beginCents, settings.precision),
-    centsLength = centsValue.length,
-    centsSliced = settings.precision > centsLength ? settings.precision : centsLength;
+    masked = masked.replace(clearSeparator, '');
+    masked = masked.length ? masked : '0';
 
-  cents = (cents + centsValue).slice(-centsSliced);
+    const beginCents = number.length - settings.precision,
+      centsValue = number.substring(beginCents, settings.precision),
+      centsLength = centsValue.length,
+      centsSliced = settings.precision > centsLength ? settings.precision : centsLength;
 
-  const output = settings.unit + masked + settings.separator + cents + settings.suffixUnit;
+    cents = (cents + centsValue).slice(-centsSliced);
 
-  return output.replace(clearSeparator, '');
-};
+    const output = settings.unit + masked + settings.floatingPoint + cents + settings.suffixUnit;
 
-export const value = (value: string | number = '', settings?: Settings) => {
-  const merged = mergeSettings(DEFAULT_SETTINGS, settings);
-  const sanitized = sanitize(value, merged.precision);
+    return output.replace(clearFloatingPoint, '');
+  };
 
-  return toMoney(sanitized, merged);
-};
+  value = (value: string | number = '', settings?: Settings) => {
+    const merged = mergeSettings(DEFAULT_SETTINGS, settings);
+    const sanitized = this.sanitize(value, merged.precision);
 
-export const raw = (value = '', settings?: Settings) => {
-  const merged = mergeSettings(DEFAULT_SETTINGS, settings);
-  const cleaned = toNumber(value);
+    return this.toMoney(sanitized, merged);
+  };
 
-  return +insert(cleaned, cleaned.length - merged.precision);
-};
+  raw = (value = '', settings?: Settings) => {
+    const merged = mergeSettings(DEFAULT_SETTINGS, settings);
+    const cleaned = getDigits(value);
 
-export const validate = (value = '', settings?: Settings) => {
-  const merged = mergeSettings(DEFAULT_SETTINGS, settings);
-  return value.length > merged.precision + merged.unit.length + merged.suffixUnit.length;
-};
+    return this.insert(cleaned, cleaned.length - merged.precision);
+  };
+
+  validate = (value = '', settings?: Settings) => {
+    const merged = mergeSettings(DEFAULT_SETTINGS, settings);
+    return value.length > merged.precision + merged.unit.length + merged.suffixUnit.length;
+  };
+}
+
+export default new Money();

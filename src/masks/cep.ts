@@ -1,8 +1,11 @@
 import * as custom from './custom';
-import {toNumber} from './helpers';
+import {Mask} from './models/Mask';
+import {getDigits} from '../helpers';
 
-export const validate = (s = '') => s.length === 9;
+class CEP implements Mask {
+  validate = (cep = '') => cep.length === 9;
+  raw = (cep = '') => getDigits(cep);
+  value = (cep = '') => custom.value(cep, '99999-999');
+}
 
-export const raw = (s = '') => toNumber(s);
-
-export const value = (s = '') => custom.value(s, '99999-999');
+export default new CEP();

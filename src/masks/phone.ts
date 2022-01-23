@@ -1,5 +1,6 @@
 import * as custom from './custom';
-import {mergeSettings, toNumber} from './helpers';
+import {mergeSettings, getDigits} from '../helpers';
+import {Mask} from './models/Mask';
 
 type Settings = {
   ddd?: string;
@@ -15,43 +16,47 @@ const PHONE_8_MASK = '9999-9999';
 const PHONE_9_MASK = '99999-9999';
 const PHONE_INTERNATIONAL = '+999 999 999 999';
 
-const getMask = (s: string, settings?: Settings) => {
-  const merged = mergeSettings(DEFAULT_SETTINGS, settings);
+class Phone extends Mask {
+  private getMask = (phone: string, settings?: Settings) => {
+    const merged = mergeSettings(DEFAULT_SETTINGS, settings);
 
-  if (merged.type === 'INTERNATIONAL') return PHONE_INTERNATIONAL;
+    if (merged.type === 'INTERNATIONAL') return PHONE_INTERNATIONAL;
 
-  let mask = PHONE_8_MASK;
-  const withDDD = merged.ddd && merged.ddd.length > 0;
+    let mask = PHONE_8_MASK;
+    const withDDD = merged.ddd && merged.ddd.length > 0;
 
-  const use9DigitMask = (() => {
-    if (withDDD) {
-      const ddd = toNumber(merged.ddd);
-      const remaining = s.substring(ddd.length);
-      return remaining.length >= 9;
+    const use9DigitMask = (() => {
+      if (withDDD) {
+        const ddd = getDigits(merged.ddd);
+        const remaining = phone.substring(ddd.length);
+        return remaining.length >= 9;
+      }
+      return phone.length >= 9;
+    })();
+
+    if (use9DigitMask) {
+      mask = PHONE_9_MASK;
     }
-    return s.length >= 9;
-  })();
 
-  if (use9DigitMask) {
-    mask = PHONE_9_MASK;
-  }
+    if (withDDD) {
+      mask = `${merged.ddd}${mask}`;
+    }
 
-  if (withDDD) {
-    mask = `${merged.ddd}${mask}`;
-  }
+    return mask;
+  };
 
-  return mask;
-};
+  raw = (phone = '') => getDigits(phone);
 
-export const raw = (s = '') => toNumber(s);
+  value = (phone = '', settings?: Settings) => {
+    const cleaned = getDigits(phone);
+    const mask = this.getMask(cleaned, settings);
+    return custom.value(cleaned, mask);
+  };
 
-export const value = (s = '', settings?: Settings) => {
-  const cleaned = toNumber(s);
-  const mask = getMask(cleaned, settings);
-  return custom.value(cleaned, mask);
-};
+  validate = (phone = '', settings?: Settings) => {
+    const mask = this.getMask(getDigits(phone), settings);
+    return phone.length === mask.length;
+  };
+}
 
-export const validate = (s = '', settings?: Settings) => {
-  const mask = getMask(toNumber(s), settings);
-  return s.length === mask.length;
-};
+export default new Phone();
