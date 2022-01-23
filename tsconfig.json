@@ -15,5 +15,5 @@
     "declaration": true,
     "removeComments": true
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "__tests__"]
 }
