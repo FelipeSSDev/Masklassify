@@ -1,4 +1,4 @@
-# Masklassyfy
+# Masklassify
 
 Completely based off of [maskfy](https://github.com/tboerc/maskfy) by [tboerc](https://github.com/tboerc)
 
@@ -19,7 +19,7 @@ tboerc's version is more production-ready. This fork is mostly a little refactor
 ## Installation
 
 ```
-yarn add FelipeSSDev/maskfy
+yarn add FelipeSSDev/Masklassify
 ```
 
 ## Usage
