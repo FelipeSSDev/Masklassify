@@ -1,4 +1,4 @@
-import * as custom from './custom';
+import maskedValueProvider from '../providers/MaskedValueProvider';
 import {getDigits, makeCheckDigits} from '../helpers';
 import {Mask} from './models/Mask';
 
@@ -45,7 +45,7 @@ class CNPJ implements Mask {
 
   raw = (cnpj = '') => getDigits(cnpj);
 
-  value = (cnpj = '') => custom.value(cnpj, '99.999.999/9999-99');
+  value = (cnpj = '') => maskedValueProvider.execute(cnpj, '99.999.999/9999-99');
 }
 
 export default new CNPJ();

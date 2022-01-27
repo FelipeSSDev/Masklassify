@@ -1,4 +1,4 @@
-import * as custom from './custom';
+import maskedValueProvider from '../providers/MaskedValueProvider';
 import {getDigits, makeCheckDigits} from '../helpers';
 import {Mask} from './models/Mask';
 
@@ -39,7 +39,7 @@ class CPF implements Mask {
 
   raw = (cpf = '') => getDigits(cpf);
 
-  value = (cpf = '') => custom.value(cpf, '999.999.999-99');
+  value = (cpf = '') => maskedValueProvider.execute(cpf, '999.999.999-99');
 }
 
 export default new CPF();

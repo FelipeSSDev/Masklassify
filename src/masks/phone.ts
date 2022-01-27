@@ -1,4 +1,4 @@
-import * as custom from './custom';
+import maskedValueProvider from '../providers/MaskedValueProvider';
 import {mergeSettings, getDigits} from '../helpers';
 import {Mask} from './models/Mask';
 
@@ -50,7 +50,7 @@ class Phone implements Mask {
   value = (phone = '', settings?: Settings) => {
     const cleaned = getDigits(phone);
     const mask = this.getMask(cleaned, settings);
-    return custom.value(cleaned, mask);
+    return maskedValueProvider.execute(cleaned, mask);
   };
 
   validate = (phone = '', settings?: Settings) => {
