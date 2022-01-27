@@ -1,28 +1,29 @@
-import maskedValueProvider from '../providers/MaskedValueProvider';
 import {mergeSettings, getDigits} from '../helpers';
 import {Mask} from './models/Mask';
+import {IMaskedValueProvider} from '../providers/interfaces/IMaskedValueProvider';
 
 type Settings = {
   ddd?: string;
   type?: 'BRL' | 'INTERNATIONAL';
 };
 
-const DEFAULT_SETTINGS: Settings = {
-  type: 'BRL',
-  ddd: '(99) ',
-};
-
-const PHONE_8_MASK = '9999-9999';
-const PHONE_9_MASK = '99999-9999';
-const PHONE_INTERNATIONAL = '+999 999 999 999';
-
 class Phone implements Mask {
+  private readonly DEFAULT_SETTINGS: Settings = {
+    type: 'BRL',
+    ddd: '(99) ',
+  };
+  private readonly PHONE_8_MASK = '9999-9999';
+  private readonly PHONE_9_MASK = '99999-9999';
+  private readonly PHONE_INTERNATIONAL = '+999 999 999 999';
+
+  constructor(private readonly maskedValueProvider: IMaskedValueProvider) {}
+
   private getMask = (phone: string, settings?: Settings) => {
-    const merged = mergeSettings(DEFAULT_SETTINGS, settings);
+    const merged = mergeSettings(this.DEFAULT_SETTINGS, settings);
 
-    if (merged.type === 'INTERNATIONAL') return PHONE_INTERNATIONAL;
+    if (merged.type === 'INTERNATIONAL') return this.PHONE_INTERNATIONAL;
 
-    let mask = PHONE_8_MASK;
+    let mask = this.PHONE_8_MASK;
     const withDDD = merged.ddd && merged.ddd.length > 0;
 
     const use9DigitMask = (() => {
@@ -35,7 +36,7 @@ class Phone implements Mask {
     })();
 
     if (use9DigitMask) {
-      mask = PHONE_9_MASK;
+      mask = this.PHONE_9_MASK;
     }
 
     if (withDDD) {
@@ -45,18 +46,20 @@ class Phone implements Mask {
     return mask;
   };
 
-  raw = (phone = '') => getDigits(phone);
+  raw(phone = '') {
+    return getDigits(phone);
+  }
 
-  value = (phone = '', settings?: Settings) => {
-    const cleaned = getDigits(phone);
-    const mask = this.getMask(cleaned, settings);
-    return maskedValueProvider.execute(cleaned, mask);
-  };
-
-  validate = (phone = '', settings?: Settings) => {
+  validate(phone = '', settings?: Settings) {
     const mask = this.getMask(getDigits(phone), settings);
     return phone.length === mask.length;
-  };
+  }
+
+  value(phone = '', settings?: Settings) {
+    const cleaned = getDigits(phone);
+    const mask = this.getMask(cleaned, settings);
+    return this.maskedValueProvider.execute(cleaned, mask);
+  }
 }
 
-export default new Phone();
+export default Phone;

@@ -9,15 +9,15 @@ type Settings = {
   unit?: string;
 };
 
-const DEFAULT_SETTINGS: Settings = {
-  precision: 2,
-  floatingPoint: ',',
-  separator: '.',
-  unit: 'R$ ',
-  suffixUnit: '',
-};
-
 class Money implements Mask {
+  private readonly DEFAULT_SETTINGS: Settings = {
+    precision: 2,
+    floatingPoint: ',',
+    separator: '.',
+    unit: 'R$ ',
+    suffixUnit: '',
+  };
+
   private sanitize = (value: string | number, precision: number) => {
     if (typeof value === 'number') {
       return value.toFixed(precision);
@@ -63,23 +63,23 @@ class Money implements Mask {
   };
 
   value = (value: string | number = '', settings?: Settings) => {
-    const merged = mergeSettings(DEFAULT_SETTINGS, settings);
+    const merged = mergeSettings(this.DEFAULT_SETTINGS, settings);
     const sanitized = this.sanitize(value, merged.precision);
 
     return this.toMoney(sanitized, merged);
   };
 
   raw = (value = '', settings?: Settings) => {
-    const merged = mergeSettings(DEFAULT_SETTINGS, settings);
+    const merged = mergeSettings(this.DEFAULT_SETTINGS, settings);
     const cleaned = getDigits(value);
 
     return this.insert(cleaned, cleaned.length - merged.precision);
   };
 
   validate = (value = '', settings?: Settings) => {
-    const merged = mergeSettings(DEFAULT_SETTINGS, settings);
+    const merged = mergeSettings(this.DEFAULT_SETTINGS, settings);
     return value.length > merged.precision + merged.unit.length + merged.suffixUnit.length;
   };
 }
 
-export default new Money();
+export default Money;

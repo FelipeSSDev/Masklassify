@@ -1,9 +1,11 @@
-import maskedValueProvider from '../providers/MaskedValueProvider';
 import {getDigits, makeCheckDigits} from '../helpers';
 import {Mask} from './models/Mask';
+import {IMaskedValueProvider} from '../providers/interfaces/IMaskedValueProvider';
 
 class CNPJ implements Mask {
-  private getCheckDigit = (digits: string) => {
+  constructor(private readonly maskedValueProvider: IMaskedValueProvider) {}
+
+  private getCheckDigit(digits: string) {
     let index = 2;
 
     const reverse: Array<number> = digits.split('').reduce((prev: number[], curr) => {
@@ -19,9 +21,9 @@ class CNPJ implements Mask {
     const mod = sum % 11;
 
     return String(mod < 2 ? 0 : 11 - mod);
-  };
+  }
 
-  validate = (cnpj = '') => {
+  validate(cnpj = '') {
     const stripped = getDigits(cnpj);
 
     if (!stripped) {
@@ -41,11 +43,15 @@ class CNPJ implements Mask {
     const checkDigitsInValidation = stripped.substring(-2);
 
     return checkDigits === checkDigitsInValidation;
-  };
+  }
 
-  raw = (cnpj = '') => getDigits(cnpj);
+  raw(cnpj = '') {
+    return getDigits(cnpj);
+  }
 
-  value = (cnpj = '') => maskedValueProvider.execute(cnpj, '99.999.999/9999-99');
+  value(cnpj = '') {
+    return this.maskedValueProvider.execute(cnpj, '99.999.999/9999-99');
+  }
 }
 
-export default new CNPJ();
+export default CNPJ;

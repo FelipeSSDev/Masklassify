@@ -1,13 +1,21 @@
-import maskedValueProvider from '../providers/MaskedValueProvider';
 import {Mask} from './models/Mask';
 import {getDigits} from '../helpers';
+import {IMaskedValueProvider} from '../providers/interfaces/IMaskedValueProvider';
 
 class CEP implements Mask {
-  validate = (cep = '') => cep.length === 9;
+  constructor(private readonly maskedValueProvider: IMaskedValueProvider) {}
 
-  raw = (cep = '') => getDigits(cep);
+  validate(cep = '') {
+    return cep.length === 9;
+  }
 
-  value = (cep = '') => maskedValueProvider.execute(cep, '99999-999');
+  raw(cep = '') {
+    return getDigits(cep);
+  }
+
+  value(cep = '') {
+    return this.maskedValueProvider.execute(cep, '99999-999');
+  }
 }
 
-export default new CEP();
+export default CEP;

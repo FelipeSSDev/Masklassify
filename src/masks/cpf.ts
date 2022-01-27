@@ -1,8 +1,10 @@
-import maskedValueProvider from '../providers/MaskedValueProvider';
 import {getDigits, makeCheckDigits} from '../helpers';
+import { IMaskedValueProvider } from '../providers/interfaces/IMaskedValueProvider';
 import {Mask} from './models/Mask';
 
 class CPF implements Mask {
+  constructor(private readonly maskedValueProvider: IMaskedValueProvider) {}
+
   private getCheckDigit = (digits: string) => {
     const numbers = digits.split('').map(number => {
       return parseInt(number, 10);
@@ -15,7 +17,7 @@ class CPF implements Mask {
     return String(mod < 2 ? 0 : 11 - mod);
   };
 
-  validate = (cpf = '') => {
+  validate(cpf = '') {
     const stripped = getDigits(cpf);
 
     if (!stripped) {
@@ -35,11 +37,15 @@ class CPF implements Mask {
     const checkDigitsInValidation = stripped.substring(-2);
 
     return checkDigits === checkDigitsInValidation;
-  };
+  }
 
-  raw = (cpf = '') => getDigits(cpf);
+  raw(cpf = '') {
+    return getDigits(cpf);
+  }
 
-  value = (cpf = '') => maskedValueProvider.execute(cpf, '999.999.999-99');
+  value(cpf = '') {
+    return this.maskedValueProvider.execute(cpf, '999.999.999-99');
+  }
 }
 
-export default new CPF();
+export default CPF;
