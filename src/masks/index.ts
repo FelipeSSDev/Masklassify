@@ -1,9 +1,17 @@
-export {default as cep} from './cep';
-export {default as cnpj} from './cnpj';
-export {default as cpf} from './cpf';
-export {default as money} from './money';
-export {default as phone} from './phone';
+import MaskedValueProvider from '../providers/MaskedValueProvider';
+import CEP from './cep';
+import CNPJ from './cnpj';
+import CPF from './cpf';
+import Money from './money';
+import Phone from './phone';
 
-export {default as maskedValueProvider} from '../providers/MaskedValueProvider';
+const maskedValueProvider = new MaskedValueProvider();
 
+const cep = new CEP(maskedValueProvider);
+const cnpj = new CNPJ(maskedValueProvider);
+const cpf = new CPF(maskedValueProvider);
+const money = new Money();
+const phone = new Phone(maskedValueProvider);
+
+export {cep, cnpj, cpf, money, phone, maskedValueProvider};
 export * as helpers from '../helpers';
