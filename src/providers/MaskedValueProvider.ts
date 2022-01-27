@@ -62,4 +62,4 @@ class MaskedValueProvider implements IMaskedValueProvider {
   }
 }
 
-export default new MaskedValueProvider();
+export default MaskedValueProvider;
